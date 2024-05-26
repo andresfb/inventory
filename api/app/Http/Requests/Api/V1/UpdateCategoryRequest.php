@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CategoryRequest extends FormRequest
+class UpdateCategoryRequest extends FormRequest
 {
     public function rules(): array
     {
@@ -15,6 +15,6 @@ class CategoryRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+        return auth()->user()->can('update', $this->category);
     }
 }

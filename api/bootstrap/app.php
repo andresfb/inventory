@@ -18,11 +18,15 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->with('categories')
                     ->firstOrFail();
             });
+
+            Route::middleware('throttle:api')
+                ->prefix('api/v1')
+                ->name('api.v1.')
+                ->group(base_path('routes/api_v1.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->throttleWithRedis();
-        //
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

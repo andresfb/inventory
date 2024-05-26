@@ -14,6 +14,7 @@ class CategoryService
         }
 
         foreach (config('categories.base_categories') as $item) {
+            // TODO: create and seed the attributes
             Category::create([
                 'user_id' => $user->getAuthIdentifier(),
                 'name' => $item,
