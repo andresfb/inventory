@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('serial_number');
             $table->integer('quantity')->default(1);
             $table->mediumInteger('value')->default(0);
+            $table->mediumText('notes')->nullable();
             $table->date('purchase_date')->nullable();
             $table->softDeletes();
             $table->timestamps();

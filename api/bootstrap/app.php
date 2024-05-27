@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,12 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
-            Route::bind('user', function ($value) {
-                return User::where('id', $value)
-                    ->with('categories')
-                    ->firstOrFail();
-            });
-
             Route::middleware('throttle:api')
                 ->prefix('api/v1')
                 ->name('api.v1.')

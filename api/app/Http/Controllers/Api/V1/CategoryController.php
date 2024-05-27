@@ -2,25 +2,32 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreCategoryRequest;
 use App\Http\Requests\Api\V1\UpdateCategoryRequest;
+use App\Http\Resources\Api\V1\CategoryResource;
 use App\Models\Category;
-use App\Traits\ApiResponses;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-class CategoryController extends Controller
+class CategoryController extends ApiController
 {
-    use AuthorizesRequests;
-    use ApiResponses;
-
-    public function index(Request $request)
+    public function __construct(private readonly CategoryService $categoryService)
     {
-        return Category::select(['id', 'name'])
-            ->where('user_id', $request->user()->id)
-            ->get();
+        parent::__construct(Category::listRelationships());
+    }
+
+    public function index(Request $request): JsonResponse|AnonymousResourceCollection
+    {
+        [$values, $perPage] = $this->getValues($request);
+
+        $list = $this->categoryService->getList(auth()->id(), $values, $perPage);
+        if ($list->isEmpty()) {
+            return $this->error('no categories found', 404);
+        }
+
+        return CategoryResource::collection($list);
     }
 
     public function store(StoreCategoryRequest $request): JsonResponse
@@ -29,9 +36,16 @@ class CategoryController extends Controller
         return $this->ok('category created successfully.');
     }
 
-    public function show(Category $category)
+    public function show(Request $request, int $categoryId): JsonResponse|CategoryResource
     {
+        [$values, ] = $this->getValues($request);
 
+        $category = $this->categoryService->getCategory($categoryId, auth()->id(), $values);
+        if ($category === null) {
+            return $this->error('category found', 404);
+        }
+
+        return new CategoryResource($category);
     }
 
     public function update(UpdateCategoryRequest $request, Category $category): JsonResponse

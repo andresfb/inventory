@@ -51,10 +51,10 @@ class Item extends Model implements HasMedia
         return $this->belongsTo(Category::class);
     }
 
-    public function attributes(): HasMany
+    public function properties(): HasMany
     {
-        return $this->hasMany(ItemAttribute::class)
-            ->with('attribute');
+        return $this->hasMany(ItemProperty::class)
+            ->with('property');
     }
 
     public function registerMediaCollections(): void

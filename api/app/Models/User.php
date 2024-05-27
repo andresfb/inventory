@@ -57,4 +57,12 @@ use Illuminate\Notifications\Notifiable;
      {
         return $this->hasMany(Item::class);
      }
+
+     public static function listRelationships(): array
+     {
+         return [
+             'categories',
+             'items',
+         ];
+     }
 }

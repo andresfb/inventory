@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('attributes', static function (Blueprint $table) {
+        Schema::create('properties', static function (Blueprint $table) {
             $table->id();
 
             $table->foreignIdFor(Category::class)
@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('attributes');
+        Schema::dropIfExists('properties');
     }
 };
