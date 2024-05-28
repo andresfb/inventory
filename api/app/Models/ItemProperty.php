@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ItemProperty extends Model
@@ -12,10 +13,15 @@ class ItemProperty extends Model
 
     protected $fillable = [
         'item_id',
-        'attribute_id',
+        'property_id',
         'value_type',
         'value',
     ];
+
+    public function property(): BelongsTo
+    {
+        return $this->belongsTo(Property::class);
+    }
 
     public function item(): BelongsTo
     {

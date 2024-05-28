@@ -3,6 +3,7 @@
 namespace App\Http\Resources\V1;
 
 use App\Models\Property;
+use App\Traits\ApiMetadata;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -11,6 +12,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class PropertyResource extends JsonResource
 {
+    use ApiMetadata;
+
     public function toArray(Request $request): array
     {
         return [
@@ -19,6 +22,8 @@ class PropertyResource extends JsonResource
             'attributes' => [
                 'category_id' => $this->category_id,
                 'name' => $this->name,
+                'created_at' => $this->created_at,
+                'updated_at' => $this->updated_at,
             ],
             'relationships' => $this->when(
                 $request->routeIs('api.v1.properties.*'),

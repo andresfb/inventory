@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Events\ItemSavedEvent;
+use App\Traits\CacheScopable;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -19,13 +21,22 @@ class Item extends Model implements HasMedia
     use InteractsWithMedia;
     use HasTags;
     use Filterable;
+    use CacheScopable;
 
     protected $fillable = [
+        'user_id',
+        'category_id',
         'name',
         'description',
+        'serial_number',
         'value',
         'quantity',
         'purchase_date',
+        'notes',
+    ];
+
+    protected $dispatchesEvents = [
+        'saved' => ItemSavedEvent::class,
     ];
 
     protected function casts(): array
@@ -70,7 +81,7 @@ class Item extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('thumb')
+        $this->addMediaCollection('thumbnail')
             ->acceptsMimeTypes([
                 'image/jpeg',
                 'image/png',
@@ -85,6 +96,12 @@ class Item extends Model implements HasMedia
                 'image/heic',
             ])
             ->useDisk('media');
+
+        $this->addMediaConversion('thumb')
+            ->format('jpg')
+            ->width(600)
+            ->sharpen(8)
+            ->performOnCollections('thumbnail', 'images');
     }
 
     public static function listRelationships(): array

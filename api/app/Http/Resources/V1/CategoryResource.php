@@ -3,6 +3,7 @@
 namespace App\Http\Resources\V1;
 
 use App\Models\Category;
+use App\Traits\ApiMetadata;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -11,6 +12,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class CategoryResource extends JsonResource
 {
+    use ApiMetadata;
+
     public function toArray(Request $request): array
     {
         return [
@@ -39,6 +42,7 @@ class CategoryResource extends JsonResource
             'includes' => [
                 'user' => new UserResource($this->whenLoaded('user')),
                 'properties' => PropertyResource::collection($this->whenLoaded('properties')),
+                'items' => ItemResource::collection($this->whenLoaded('items')),
             ],
             'links' => [
                 'self' => route('api.v1.categories.show', $this->id)

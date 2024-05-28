@@ -21,7 +21,7 @@ class CreateUserCommand extends Command
         try {
             $name = text(
                 label: 'What is your name?',
-                default: config('constants.base_user_name'),
+                default: config('app.author_name'),
                 validate: fn (string $value) => match (true) {
                     strlen($value) < 3 => 'The name must be at least 3 characters.',
                     strlen($value) > 255 => 'The name must not exceed 255 characters.',
@@ -31,7 +31,7 @@ class CreateUserCommand extends Command
 
             $email = text(
                 label: 'What is your email?',
-                default: config('constants.base_user_email'),
+                default: config('app.author_email'),
                 validate: fn (string $value) => match (true) {
                     !filter_var($value, FILTER_VALIDATE_EMAIL) => 'Invalid Email',
                     strlen($value) > 255 => 'The email must not exceed 255 characters.',

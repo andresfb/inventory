@@ -2,36 +2,38 @@
 
 namespace App\Http\Filters\V1;
 
+use App\Http\Validators\V1\RequestValidator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 abstract class QueryFilter
 {
-    private Builder $builder;
-    private array $values = [];
+    protected Builder $builder;
 
-    // TODO: consider passing the Validators to this object so it can handle the entire process
-    // TODO: if we do the adobe, how can the service access all the validated values before filtering?
-    // TODO: should I forgo the service and move the entire process to the Model? How can I cache there?
-
-    public function setValues(array $values): void
+    public function __construct(public readonly RequestValidator $validator)
     {
-        $this->values = $values;
     }
 
     public function apply(Builder $builder): Builder
     {
-        if (empty($this->values)) {
-            throw new \RuntimeException('values not set');
-        }
-
         $this->builder = $builder;
 
-        foreach ($this->values as $key => $value) {
-            if (!method_exists($this, $key)) {
+        foreach ($this->validator->validated() as $key => $value) {
+            $method = Str::camel($key);
+            if (!method_exists($this, $method)) {
                 continue;
             }
 
-            $this->$key($value);
+            $this->$method($value);
+        }
+
+        return $this->includeRelationships();
+    }
+
+    private function includeRelationships(): Builder
+    {
+        foreach ($this->validator->includes() as $include) {
+            $this->builder->with($include);
         }
 
         return $this->builder;
