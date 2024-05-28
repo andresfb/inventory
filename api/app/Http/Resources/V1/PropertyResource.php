@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Api\V1;
+namespace App\Http\Resources\V1;
 
 use App\Models\Property;
 use Illuminate\Http\Request;

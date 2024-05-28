@@ -7,6 +7,8 @@ use App\Models\Property;
 use App\Models\Category;
 use App\Traits\CacheTimeLivable;
 use App\Traits\Fieldable;
+use App\Traits\Relatable;
+use App\Validators\V1\CategoryValidator;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -16,54 +18,52 @@ class CategoryService
 {
     use CacheTimeLivable;
     use Fieldable;
+    use Relatable;
 
     /**
      * @noinspection PhpParamsInspection
      * @noinspection UnknownInspectionInspection
      */
-    public function getCategory(int $categoryId, int $userId, array $params = []): ?Category
+    public function getCategory(int $categoryId, CategoryValidator $validator): ?Category
     {
-        $includes = $params[$this->includeField()] ?? [];
-
-        $key = CategoriesCacheKeys::categoryByUser($userId);
+        $validator->validate();
+        $key = CategoriesCacheKeys::categoryByUser($validator->userId());
 
         return Cache::tags($key)
             ->remember(
-                md5("$key:$categoryId:$userId"),
+                md5("$key:$categoryId:{$validator->userId()}"),
                 $this->mediumLivedTtlMinutes(),
-                function () use ($userId, $categoryId, $includes) {
+                function () use ($validator, $categoryId) {
                     $query = Category::where('id', $categoryId)
-                        ->where('user_id', $userId);
+                        ->where('user_id', $validator->userId());
 
-                    $this->includeRelationships($includes, $query);
+                    $this->includeRelationships($validator->includes(), $query);
 
                     return $query->first();
                 }
             );
     }
 
-    public function getList(int $userId, array $params, int $perPage): LengthAwarePaginator
+    /**
+     * @noinspection PhpParamsInspection
+     * @noinspection UnknownInspectionInspection
+     */
+    public function getList(CategoryValidator $validator): LengthAwarePaginator
     {
-        $includes = $params[$this->includeField()] ?? [];
+        $validator->validate();
+        $tagKey = CategoriesCacheKeys::categoriesByUserList($validator->userId());
+        $cacheKey = $validator->cacheKey($tagKey);
 
-        $cacheKey = sprintf(
-            '%s:%s:%s:%s',
-            CategoriesCacheKeys::categoriesByUserList($userId),
-            $params['page'] ?? 1,
-            $includes ? implode(',', $includes) : '',
-            $perPage,
-        );
-
-        return Cache::tags(CategoriesCacheKeys::categoriesByUserList($userId))
+        return Cache::tags($tagKey)
             ->remember(
                 md5($cacheKey),
                 $this->mediumLivedTtlMinutes(),
-                function () use ($userId, $perPage, $includes) {
-                    $query = Category::where('user_id', $userId);
+                function () use ($validator) {
+                    $query = Category::where('user_id', $validator->userId());
 
-                    $this->includeRelationships($includes, $query);
+                    $this->includeRelationships($validator->includes(), $query);
 
-                    return $query->paginate($perPage);
+                    return $query->paginate($validator->perPage());
                 }
         );
     }
@@ -94,13 +94,6 @@ class CategoryService
                     'name' => $attribute,
                 ]);
             }
-        }
-    }
-
-    private function includeRelationships(array $includes, Builder $query): void
-    {
-        foreach ($includes as $include) {
-            $query->with($include);
         }
     }
 }

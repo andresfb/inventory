@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\Filterable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +18,7 @@ class Item extends Model implements HasMedia
     use SoftDeletes;
     use InteractsWithMedia;
     use HasTags;
+    use Filterable;
 
     protected $fillable = [
         'name',
@@ -57,6 +60,14 @@ class Item extends Model implements HasMedia
             ->with('property');
     }
 
+    public function scopeWithInfo(Builder $query): Builder
+    {
+        return $query->with([
+            'category',
+            'properties',
+        ]);
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('thumb')
@@ -74,5 +85,14 @@ class Item extends Model implements HasMedia
                 'image/heic',
             ])
             ->useDisk('media');
+    }
+
+    public static function listRelationships(): array
+    {
+        return [
+            'user',
+            'media',
+            'tags',
+        ];
     }
 }

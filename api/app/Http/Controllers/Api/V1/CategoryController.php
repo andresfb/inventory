@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Requests\Api\V1\StoreCategoryRequest;
-use App\Http\Requests\Api\V1\UpdateCategoryRequest;
-use App\Http\Resources\Api\V1\CategoryResource;
+use App\Http\Requests\V1\StoreCategoryRequest;
+use App\Http\Requests\V1\UpdateCategoryRequest;
+use App\Http\Resources\V1\CategoryResource;
 use App\Models\Category;
 use App\Services\CategoryService;
+use App\Validators\V1\CategoryValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -18,16 +19,11 @@ class CategoryController extends ApiController
         parent::__construct(Category::listRelationships());
     }
 
-    public function index(Request $request): JsonResponse|AnonymousResourceCollection
+    public function index(CategoryValidator $validator): JsonResponse|AnonymousResourceCollection
     {
-        [$values, $perPage] = $this->getValues($request);
-
-        $list = $this->categoryService->getList(auth()->id(), $values, $perPage);
-        if ($list->isEmpty()) {
-            return $this->error('no categories found', 404);
-        }
-
-        return CategoryResource::collection($list);
+        return CategoryResource::collection(
+            $this->categoryService->getList($validator)
+        );
     }
 
     public function store(StoreCategoryRequest $request): JsonResponse
@@ -36,11 +32,9 @@ class CategoryController extends ApiController
         return $this->ok('category created successfully.');
     }
 
-    public function show(Request $request, int $categoryId): JsonResponse|CategoryResource
+    public function show(CategoryValidator $validator, int $categoryId): JsonResponse|CategoryResource
     {
-        [$values, ] = $this->getValues($request);
-
-        $category = $this->categoryService->getCategory($categoryId, auth()->id(), $values);
+        $category = $this->categoryService->getCategory($categoryId, $validator);
         if ($category === null) {
             return $this->error('category found', 404);
         }

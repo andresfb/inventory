@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Requests\UpdateUserRequest;
-use App\Http\Resources\Api\V1\UserResource;
+use App\Http\Resources\V1\UserResource;
 use App\Models\User;
 use App\Services\UserService;
 use Exception;

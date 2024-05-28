@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Api\V1;
+namespace App\Http\Resources\V1;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -29,10 +29,10 @@ class CategoryResource extends JsonResource
                 'user' => [
                     'data' => [
                         'type' => 'user',
-                        'id' => $this->id,
+                        'id' => $this->user_id,
                     ],
                     'links' => [
-                        'self' => route('api.v1.user.show', $this->id),
+                        'self' => route('api.v1.user.show', $this->user_id),
                     ],
                 ]
             ],
