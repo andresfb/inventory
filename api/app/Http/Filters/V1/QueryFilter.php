@@ -14,6 +14,20 @@ abstract class QueryFilter
     {
     }
 
+    protected function filter(array $values): Builder
+    {
+        foreach ($values as $key => $value) {
+            $method = Str::camel($key);
+            if (!method_exists($this, $method)) {
+                continue;
+            }
+
+            $this->$method($value);
+        }
+
+        return $this->builder;
+    }
+
     public function apply(Builder $builder): Builder
     {
         $this->builder = $builder;

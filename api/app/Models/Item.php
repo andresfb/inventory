@@ -31,7 +31,7 @@ class Item extends Model implements HasMedia
         'serial_number',
         'value',
         'quantity',
-        'purchase_date',
+        'purchased_at',
         'notes',
     ];
 
@@ -42,7 +42,9 @@ class Item extends Model implements HasMedia
     protected function casts(): array
     {
         return [
-            'purchase_date' => 'date',
+            'user_id' => 'integer',
+            'category_id' => 'integer',
+            'purchased_at' => 'date',
             'quantity' => 'integer',
         ];
     }
